@@ -1,4 +1,3 @@
-# Utiliser l'image officielle Python comme image de base
 FROM python:3.9-slim
 
 # Définir le répertoire de travail dans le conteneur
@@ -18,4 +17,4 @@ EXPOSE 5000
 
 # Commande pour démarrer l'application
 # Adapter cette commande selon la façon dont votre application démarre
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]

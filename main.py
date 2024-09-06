@@ -12,7 +12,7 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Modèle utilisateur avec e-mail comme clé primaire
+# Modèle utilisateur 
 class UserDB(Base):
     __tablename__ = "users"
     email = Column(String, primary_key=True, index=True)  # Utilisation de l'email comme clé primaire
@@ -38,13 +38,17 @@ def get_db():
 # Endpoint pour l'enregistrement des utilisateurs
 @app.post("/register")
 def register(user: User, db: Session = Depends(get_db)):
-    if db.query(UserDB).filter(UserDB.email == user.email).first():
-        raise HTTPException(status_code=400, detail="User already exists")
-    db_user = UserDB(email=user.email, password=user.password, is_admin=user.is_admin)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return {"message": "User registered successfully", "user_email": db_user.email}
+    user = db.query(UserDB).filter(UserDB.email == user.email).first()
+    
+    if user is not None:  
+        db_user = UserDB(email=user.email, password=user.password, is_admin=user.is_admin)
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return {"message": "User registered successfully", "user_email": db_user.email}
+    
+    else :
+        return False
 
 # Endpoint pour la connexion des utilisateurs
 @app.post("/login")
@@ -52,13 +56,15 @@ def login(email: str, password: str,admin_page: str , db: Session = Depends(get_
     if admin_page == True:
         user = db.query(UserDB).filter(UserDB.email == email, UserDB.password == password, UserDB == admin_page ).first()
         if user == None:
-            return True
-        else:
             return False
-        
+        else:
+            return True    
     else:
         user = db.query(UserDB).filter(UserDB.email == email, UserDB.password == password).first()
-        return False
+        if user == None:
+            return False
+        else:
+            return True 
     
 
 # Endpoint pour supprimer un utilisateur

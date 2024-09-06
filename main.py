@@ -48,15 +48,18 @@ def register(user: User, db: Session = Depends(get_db)):
 
 # Endpoint pour la connexion des utilisateurs
 @app.post("/login")
-def login(email: str, password: str, db: Session = Depends(get_db)):
-    user = db.query(UserDB).filter(UserDB.email == email).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if user.password != password:
-        raise HTTPException(status_code=401, detail="Incorrect password")
-    if user.is_admin:
-        return {"message": "Admin login successful"}
-    return {"message": "User login successful"}
+def login(email: str, password: str,admin_page: str , db: Session = Depends(get_db)):
+    if admin_page == True:
+        user = db.query(UserDB).filter(UserDB.email == email, UserDB.password == password, UserDB == admin_page ).first()
+        if user == None:
+            return True
+        else:
+            return False
+        
+    else:
+        user = db.query(UserDB).filter(UserDB.email == email, UserDB.password == password).first()
+        return False
+    
 
 # Endpoint pour supprimer un utilisateur
 @app.delete("/delete")
